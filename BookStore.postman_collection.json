@@ -1,0 +1,389 @@
+{
+	"info": {
+		"_postman_id": "bookstore-bnsp-collection",
+		"name": "BookStore BNSP API",
+		"description": "Koleksi lengkap API BookStore untuk sertifikasi BNSP Junior Web Developer.\n\nBase URL: http://localhost:8000/api\n\nAkun Demo:\n- Admin: admin@bookstore.test / password\n- User: user@bookstore.test / password",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "baseURL", "value": "http://localhost:8000/api" },
+		{ "key": "authToken", "value": "" },
+		{ "key": "adminToken", "value": "" }
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/register", "host": ["{{baseURL}}"], "path": ["register"] },
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@bookstore.test\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}",
+							"options": { "raw": { "language": "json" } }
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', () => pm.response.to.have.status(201));",
+									"pm.test('Has token', () => { const json = pm.response.json(); pm.expect(json.data.token).to.be.a('string'); pm.collectionVariables.set('authToken', json.data.token); });"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/login", "host": ["{{baseURL}}"], "path": ["login"] },
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@bookstore.test\",\n  \"password\": \"password\"\n}",
+							"options": { "raw": { "language": "json" } }
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Has token', () => { const json = pm.response.json(); pm.expect(json.success).to.be.true; pm.collectionVariables.set('authToken', json.data.token); });"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Login Admin",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/login", "host": ["{{baseURL}}"], "path": ["login"] },
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@bookstore.test\",\n  \"password\": \"password\"\n}",
+							"options": { "raw": { "language": "json" } }
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"pm.test('Has token', () => { const json = pm.response.json(); pm.expect(json.success).to.be.true; pm.collectionVariables.set('adminToken', json.data.token); });"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": { "raw": "{{baseURL}}/user", "host": ["{{baseURL}}"], "path": ["user"] }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Has user data', () => pm.expect(pm.response.json().data).to.have.property('email'));"] }
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Authorization", "value": "Bearer {{authToken}}" }
+						],
+						"url": { "raw": "{{baseURL}}/logout", "host": ["{{baseURL}}"], "path": ["logout"] }
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] }
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Books",
+			"item": [
+				{
+					"name": "List Books",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/books?sort=latest&page=1", "host": ["{{baseURL}}"], "path": ["books"], "query": [{ "key": "sort", "value": "latest" }, { "key": "page", "value": "1" }, { "key": "search", "value": "", "disabled": true }, { "key": "category", "value": "", "disabled": true }] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Has data array', () => pm.expect(pm.response.json().data).to.be.an('array'));"] } }]
+				},
+				{
+					"name": "Book Detail",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/books/laskar-pelangi", "host": ["{{baseURL}}"], "path": ["books", "laskar-pelangi"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Has title', () => pm.expect(pm.response.json().data).to.have.property('title'));"] } }]
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "List Categories",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/categories", "host": ["{{baseURL}}"], "path": ["categories"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Has categories', () => pm.expect(pm.response.json().data).to.be.an('array'));"] } }]
+				},
+				{
+					"name": "Books by Category",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/categories/fiksi/books", "host": ["{{baseURL}}"], "path": ["categories", "fiksi", "books"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "Get Cart",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/cart", "host": ["{{baseURL}}"], "path": ["cart"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Add to Cart",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/cart", "host": ["{{baseURL}}"], "path": ["cart"] },
+						"body": { "mode": "raw", "raw": "{\n  \"book_id\": 1,\n  \"quantity\": 2\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+				},
+				{
+					"name": "Update Cart Quantity",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/cart/1", "host": ["{{baseURL}}"], "path": ["cart", "1"] },
+						"body": { "mode": "raw", "raw": "{\n  \"quantity\": 3\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Remove from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/cart/1", "host": ["{{baseURL}}"], "path": ["cart", "1"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/orders", "host": ["{{baseURL}}"], "path": ["orders"] },
+						"body": { "mode": "raw", "raw": "{\n  \"payment_method\": \"midtrans\"\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Has order_code', () => pm.expect(pm.response.json().data).to.have.property('order_code'));"] } }]
+				},
+				{
+					"name": "List Orders",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/orders", "host": ["{{baseURL}}"], "path": ["orders"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Order Detail",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{authToken}}" }],
+						"url": { "raw": "{{baseURL}}/orders/INV-20240101-XXXX", "host": ["{{baseURL}}"], "path": ["orders", "INV-20240101-XXXX"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200 or 404', () => pm.expect([200,404]).to.include(pm.response.code));"] } }]
+				},
+				{
+					"name": "Midtrans Webhook",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/orders/notification", "host": ["{{baseURL}}"], "path": ["orders", "notification"] },
+						"body": { "mode": "raw", "raw": "{\n  \"order_id\": \"INV-20240101-XXXX\",\n  \"status_code\": \"200\",\n  \"transaction_status\": \"settlement\"\n}", "options": { "raw": { "language": "json" } } }
+					}
+				}
+			]
+		},
+		{
+			"name": "Contact",
+			"item": [
+				{
+					"name": "Send Contact",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseURL}}/contact", "host": ["{{baseURL}}"], "path": ["contact"] },
+						"body": { "mode": "raw", "raw": "{\n  \"name\": \"John\",\n  \"email\": \"john@test.com\",\n  \"subject\": \"Pertanyaan\",\n  \"message\": \"Apakah buku ini tersedia?\"\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/dashboard", "host": ["{{baseURL}}"], "path": ["admin", "dashboard"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Has summary', () => pm.expect(pm.response.json().data).to.have.property('summary'));"] } }]
+				},
+				{
+					"name": "Admin - List Books",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/books", "host": ["{{baseURL}}"], "path": ["admin", "books"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - Create Book",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/books", "host": ["{{baseURL}}"], "path": ["admin", "books"] },
+						"body": { "mode": "formdata", "formdata": [{ "key": "category_id", "value": "1" }, { "key": "title", "value": "Buku Baru Test" }, { "key": "author", "value": "Test Author" }, { "key": "publisher", "value": "Test Publisher" }, { "key": "year", "value": "2024" }, { "key": "price", "value": "75000" }, { "key": "stock", "value": "10" }, { "key": "description", "value": "Deskripsi buku test." }, { "key": "cover_image", "type": "file", "src": "", "disabled": true }] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+				},
+				{
+					"name": "Admin - Update Book",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/books/1", "host": ["{{baseURL}}"], "path": ["admin", "books", "1"] },
+						"body": { "mode": "raw", "raw": "{\n  \"title\": \"Buku Updated\",\n  \"price\": 99000\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - Delete Book",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/books/21", "host": ["{{baseURL}}"], "path": ["admin", "books", "21"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - List Categories",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/categories", "host": ["{{baseURL}}"], "path": ["admin", "categories"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - Create Category",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/categories", "host": ["{{baseURL}}"], "path": ["admin", "categories"] },
+						"body": { "mode": "raw", "raw": "{\n  \"name\": \"Kategori Baru\",\n  \"description\": \"Deskripsi test\"\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));"] } }]
+				},
+				{
+					"name": "Admin - List Users",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/users", "host": ["{{baseURL}}"], "path": ["admin", "users"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - List Orders",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/orders", "host": ["{{baseURL}}"], "path": ["admin", "orders"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - Update Order Status",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/orders/1/status", "host": ["{{baseURL}}"], "path": ["admin", "orders", "1", "status"] },
+						"body": { "mode": "raw", "raw": "{\n  \"status\": \"paid\"\n}", "options": { "raw": { "language": "json" } } }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - List Contacts",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/contacts", "host": ["{{baseURL}}"], "path": ["admin", "contacts"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				},
+				{
+					"name": "Admin - Mark Contact Read",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Accept", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+						"url": { "raw": "{{baseURL}}/admin/contacts/1/read", "host": ["{{baseURL}}"], "path": ["admin", "contacts", "1", "read"] }
+					},
+					"event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }]
+				}
+			]
+		}
+	]
+}
